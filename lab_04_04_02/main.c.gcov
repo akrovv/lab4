@@ -1,0 +1,177 @@
+        -:    0:Source:main.c
+        -:    0:Graph:./main.gcno
+        -:    0:Data:./main.gcda
+        -:    0:Runs:14
+        -:    1:#include <stdio.h>
+        -:    2:#include <stdlib.h>
+        -:    3:#include <stdbool.h>
+        -:    4:#include <stddef.h>
+        -:    5:#include <string.h>
+        -:    6:#include <ctype.h>
+        -:    7:
+        -:    8:#define STR_INPUT_ERROR 1
+        -:    9:#define STR_SIZE_ERROR 2
+        -:   10:#define STR_WORD_SIZE_ERROR 3
+        -:   11:#define STR_EMPTY_SIZE_ERROR 4
+        -:   12:#define STR_EMPTY_ERROR 5
+        -:   13:
+        -:   14:#define MAX_STR_LEN 300
+        -:   15:#define STR_LEN 256
+        -:   16:#define MAX_WORD_LEN 16
+        -:   17:
+        -:   18:bool regular_months_expr(char str[], char months[][STR_LEN]);
+        -:   19:bool is_month(char str[], char months[][STR_LEN], int *number_month);
+        -:   20:void capitalize(char str[]);
+        -:   21:bool is_leap(size_t year);
+        -:   22:
+       14:   23:int main(void) 
+        -:   24:{
+        -:   25:    char str[MAX_STR_LEN];
+        -:   26:
+       14:   27:    char months[STR_LEN][STR_LEN] = { "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december" }; 
+        -:   28:
+       14:   29:    if (fgets(str, MAX_STR_LEN, stdin) == NULL || strlen(str) > STR_LEN)
+        2:   30:        return STR_INPUT_ERROR;
+        -:   31:
+       12:   32:    if (!str[0])
+    #####:   33:        return STR_SIZE_ERROR;
+        -:   34:
+       12:   35:    regular_months_expr(str, months);
+        -:   36:
+       12:   37:    if (regular_months_expr(str, months))
+        2:   38:        printf("YES\n");
+        -:   39:    else
+       10:   40:        printf("NO\n");
+        -:   41:
+       12:   42:    return EXIT_SUCCESS;
+        -:   43:}
+        -:   44:
+       16:   45:void capitalize(char str[]) 
+        -:   46:{
+      112:   47:    for (size_t i = 0; i < strlen(str); i++)
+       96:   48:        str[i] = tolower(str[i]);
+       16:   49:}
+        -:   50:
+        6:   51:bool is_leap(size_t year)
+        -:   52:{
+        6:   53:    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+        -:   54:}
+        -:   55:
+       16:   56:bool is_month(char str[], char months[][STR_LEN], int *number_month)
+        -:   57:{
+       66:   58:    for (int i = 0; i < 12; i++)
+       64:   59:        if (!strcmp(str, months[i]))
+        -:   60:        {
+       14:   61:            *number_month = i + 1;
+       14:   62:            return true;
+        -:   63:        }
+        2:   64:    return false;
+        -:   65:}
+        -:   66:
+       24:   67:size_t str_date(char str[], size_t i, char day[], char signs[])
+        -:   68:{
+       24:   69:    size_t j = 0;
+        -:   70:
+      140:   71:    for (; !isalpha(str[i]) && !strchr(signs, str[i]); i++)
+      116:   72:        if (isdigit(str[i]))
+       52:   73:            day[j++] = str[i];
+        -:   74:
+       24:   75:    day[j] = '\0';
+        -:   76:
+       24:   77:    if (strlen(day) < 2 || !isdigit(str[i - 2]) || !isspace(str[i - 1]))
+        4:   78:        return 0;
+        -:   79:
+       20:   80:    return i;
+        -:   81:}
+        -:   82:
+       20:   83:size_t str_month(char str[], size_t i, char month[], char signs[])
+        -:   84:{
+       20:   85:    size_t j = 0;
+        -:   86:
+      126:   87:    while (isalpha(str[i]) && !strchr(signs, str[i]))
+        -:   88:    {
+      106:   89:        month[j] = str[i];
+      106:   90:        i++;
+      106:   91:        j++;
+        -:   92:    }
+        -:   93:
+       20:   94:    month[j] = '\0';
+        -:   95:
+       20:   96:    if (!isspace(str[i]) || !isdigit(str[i + 1]) || !j)
+        4:   97:        return 0;
+        -:   98:
+       16:   99:    return i;
+        -:  100:}
+        -:  101:
+       14:  102:size_t str_year(char str[], size_t i, char year[], char signs[])
+        -:  103:{
+       14:  104:    size_t j = 0;
+        -:  105:
+       98:  106:    for (; str[i] && !strchr(signs, str[i]); i++)
+       84:  107:        if (isdigit(str[i]))
+       52:  108:            year[j++] = str[i];
+        -:  109:
+       14:  110:    year[j] = '\0';
+        -:  111:
+       14:  112:    if (strlen(year) < 4)
+        2:  113:        return 0;
+        -:  114:
+       12:  115:    return i;
+        -:  116:}
+        -:  117:
+        -:  118:
+       24:  119:bool regular_months_expr(char str[], char months[][STR_LEN])
+        -:  120:{
+       24:  121:    size_t i = 0;
+        -:  122:
+       24:  123:    int number_month = 0;
+        -:  124:
+        -:  125:    char day[STR_LEN];
+        -:  126:    char month[STR_LEN];
+        -:  127:    char year[STR_LEN];
+        -:  128:
+       24:  129:    char signs[] = "<,.>/?;:'\"[{}]\\|!@#$%^&*()-_=+";
+        -:  130:
+       24:  131:    day[0] = '\0';
+        -:  132:
+       24:  133:    i = str_date(str, i, day, signs);
+        -:  134:
+       24:  135:    if (!i)
+        4:  136:        return false;
+        -:  137:
+       20:  138:    month[0] = '\0';
+        -:  139:
+       20:  140:    i = str_month(str, i, month, signs);
+        -:  141:
+       20:  142:    if (!i)
+        4:  143:        return false;
+        -:  144:
+       16:  145:    capitalize(month);
+       16:  146:    if (!is_month(month, months, &number_month))
+        2:  147:        return false;
+        -:  148:
+       14:  149:    i = str_year(str, i, year, signs);
+        -:  150:
+       14:  151:    if (!i)
+        2:  152:        return false;
+        -:  153:
+       12:  154:    int int_day = atoi(day);
+       12:  155:    int int_year = atoi(year);
+        -:  156:
+       12:  157:    if (int_day > 31 || int_year > 9999 || int_year < 1000 || int_day == 0 || int_year == 0)
+        2:  158:        return false;
+        -:  159:
+       10:  160:    int current_count_day = 28 + (number_month + number_month / 8) % 2 + 2 % number_month + 1 / number_month * 2;
+        -:  161:
+       10:  162:    if (number_month == 2)
+        -:  163:    {
+        6:  164:        if (int_day == 29 && !is_leap(int_year))
+        2:  165:            return false;
+        4:  166:        else if (int_day == 28 && is_leap(int_year))
+        2:  167:            return false;
+        -:  168:    }
+        4:  169:    else if (int_day > current_count_day)
+        2:  170:        return false;
+        -:  171:
+        4:  172:    return true;
+        -:  173:}

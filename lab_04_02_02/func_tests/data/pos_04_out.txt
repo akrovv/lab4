@@ -1,0 +1,2 @@
+Result:35 no
+Result:69 yes
